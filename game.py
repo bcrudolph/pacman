@@ -20,8 +20,20 @@ class Game:
     def __load_sprites(self):
         #getting pacman character sprite
         self.pacman = models.Pacman()
-        self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman))
-        
+        self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman)) 
+        #getting enemies characters sprites
+        self.blinky = models.Enemy("blinky.png", self.width/2, self.height/2)
+        self.blinky_sprite = pygame.sprite.RenderPlain((self.blinky))
+
+        self.pinky = models.Enemy("pinky.png", self.width/2+10, self.height/2+10)
+        self.pinky_sprite = pygame.sprite.RenderPlain((self.pinky))
+
+        self.inky = models.Enemy("inky.png", self.width/2+20, self.height/2+20)
+        self.inky_sprite = pygame.sprite.RenderPlain((self.inky))
+
+        self.clyde = models.Enemy("clyde.png", self.width/2+30, self.height/2+30)
+        self.clyde_sprite = pygame.sprite.RenderPlain((self.clyde))
+
         #initialize sprites group 
         self.pacdots_sprites = pygame.sprite.Group()
         
@@ -59,11 +71,17 @@ class Game:
                             or event.key == K_UP \
                             or event.key == K_DOWN:
                                 self.pacman.move(event.key)
-                                
+            
+            # enemies random move
+            self.blinky.move()
+            self.pinky.move()
+            self.inky.move()
+            self.clyde.move()
+
             #check collisions True means: kill sprite from group in collision
             pacman_dots_cols = pygame.sprite.spritecollide(self.pacman,
                                                             self.pacdots_sprites,
-                                                            True)
+                                                          True)
             #count score 
             for dot in pacman_dots_cols:
                 self.pacman.pac_dots += 1
@@ -74,6 +92,10 @@ class Game:
             #draw sprites
             self.pacdots_sprites.draw(self.screen)
             self.pacman_sprite.draw(self.screen)
+            self.blinky_sprite.draw(self.screen)
+            self.pinky_sprite.draw(self.screen)
+            self.inky_sprite.draw(self.screen)
+            self.clyde_sprite.draw(self.screen)
             pygame.display.flip()
                     
 

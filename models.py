@@ -2,7 +2,9 @@
 
 import os, sys, glob
 import pygame
+import random
 from pygame.locals import *
+
 import utils
 import config
 
@@ -55,9 +57,6 @@ class Pacman(pygame.sprite.Sprite):
         center = self.rect.center
 
     def move(self, key):
-        x_move = False
-        y_move = False
-
         if key == K_RIGHT:
             self.x_pos += self.x_step
             self.__anim_update()
@@ -79,3 +78,41 @@ class PacDot(pygame.sprite.Sprite):
         self.image, self.rect = utils.load_image(os.path.join(config.img_dir,"pac_dot.png"))
         if rect != None:
             self.rect = rect
+
+class Enemy(pygame.sprite.Sprite):
+    '''
+    Enemies class for blinky, pinky, clyde, inky
+    '''
+    def __init__(self, pathname, init_pos_x = 0, init_pos_y = 0):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = utils.load_image(os.path.join(config.enemy_dir, pathname),-1)
+        self.screen = pygame.display.get_surface()
+        self.area = self.screen.get_rect()
+        self.scr_width = self.screen.get_width()
+        self.scr_height = self.screen.get_height()
+
+        self.rect.topleft = init_pos_x, init_pos_y
+
+        self.x_step = 2
+        self.y_step = 2
+
+    def __serve(self):
+        angle = random.randint(-45,45)
+
+
+    def move(self):
+        self.rect.x += self.x_step
+        self.rect.y += self.y_step
+
+        if self.rect.left < self.area.left or\
+            self.rect.right > self.area.right:
+            self.x_step = -self.x_step
+
+        if self.rect.top < self.area.top or\
+            self.rect.bottom > self.area.bottom:
+            self.y_step = -self.y_step
+
+    def update(self):
+        pass
+
+
