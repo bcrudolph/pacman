@@ -6,7 +6,9 @@ import models
 import config
 
 class Game:
-    def __init__(self, width = 640, height = 480):
+    def __init__(self,
+                 width = config.screen_width,
+                 height = config.screen_height):
         # initialization all pygame modules
         pygame.init()
 
@@ -17,10 +19,117 @@ class Game:
         #set repetition  (set_repeat(after first keydown, after any other))
         pygame.key.set_repeat(30,30)
 
+    def __load_wall_sprites(self):
+        y_offset = 40
+        x_offset = 70
+        wall_width = 20
+        wall_divider = 7
+        wall_coords = [(x_offset,
+                        y_offset,
+                        self.width-2*x_offset,
+                        wall_width), #top
+
+                        (x_offset,
+                        self.height-y_offset-wall_width,
+                        self.width-2*x_offset,
+                        wall_width), #bottom
+
+                        (x_offset,
+                        y_offset+wall_width,
+                        wall_width,
+                        (self.height - 2*y_offset-wall_width)/2 -config.portal_width), #left top
+
+                        (x_offset,
+                         y_offset+(self.height-2*y_offset-wall_width)/2+config.portal_width,
+                         wall_width,
+                         (self.height - 2*y_offset-wall_width)/2 -config.portal_width), #left bottom
+
+                        (self.width-x_offset-wall_width,
+                         y_offset+wall_width,
+                         wall_width,
+                         (self.height - 2*y_offset-wall_width)/2 -config.portal_width), #right top
+
+                        (self.width-x_offset-wall_width,
+                         y_offset+(self.height-2*y_offset-wall_width)/2+config.portal_width,
+                         wall_width,
+                         (self.height - 2*y_offset-wall_width)/2 -config.portal_width), #right bottom
+
+                        (x_offset+wall_width+config.aisle_width,
+                         y_offset+wall_width+config.aisle_height,
+                         (self.width-2*x_offset)/wall_divider,
+                         wall_width), #1 undertop line block
+
+                        (x_offset+wall_width+2*config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width+config.aisle_height,
+                         (self.width-2*x_offset)/wall_divider,
+                         wall_width), #2 undertop line block
+
+                        (x_offset+wall_width+3*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width,
+                         wall_width,
+                         (self.width-2*x_offset)/wall_divider), #center undertop column block
+
+                        (x_offset+2*wall_width+4*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width+config.aisle_height,
+                         (self.width-2*x_offset)/wall_divider,
+                         wall_width), #3 undertop line block
+
+                        (x_offset+2*wall_width+5*config.aisle_width+3*(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width+config.aisle_height,
+                         (self.width-2*x_offset)/wall_divider,
+                         wall_width), #4 undertop line block
+
+                        (x_offset+wall_width+2*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width+config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                         (self.width-2*x_offset)/wall_divider,
+                        wall_width), #center line block 1(horizontal part)
+
+                        (x_offset+wall_width+3*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+wall_width+(self.width-2*x_offset)/wall_divider+config.aisle_width+wall_width,
+                         wall_width,
+                         ((self.width-2*x_offset)/wall_divider)/3), #center column block 1(vertical part)
+
+                        (x_offset+wall_width+2*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+3*wall_width+3*config.aisle_width+4*(self.width-2*x_offset)/wall_divider/3,
+                         (self.width-2*x_offset)/wall_divider,
+                        wall_width), #center line block 2(horizontal part)
+
+                        (x_offset+wall_width+3*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         y_offset+4*wall_width+4*(self.width-2*x_offset)/wall_divider/3+3*config.aisle_width,
+                         wall_width,
+                         ((self.width-2*x_offset)/wall_divider)/3), #center column block 2(vertical part)
+
+                        (x_offset+wall_width+2*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                        y_offset+4*wall_width+4*config.aisle_width+5*(self.width-2*x_offset)/wall_divider/3,
+                        (self.width-2*x_offset)/wall_divider,
+                        wall_width), #center line block 3(horizontal part)
+
+                        (x_offset+wall_width+3*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                        y_offset+5*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
+                        wall_width,
+                        ((self.width-2*x_offset)/wall_divider)/3) #center column block 3(vertical part)
+
+        ]
+
+        self.wall_sprites = pygame.sprite.Group()
+
+        for coords in wall_coords:
+            self.wall_sprites.add(models.Wall(coords[0], coords[1], coords[2], coords[3]))
+
+    def __load_pac_dots(self):
+        #initialize sprites group 
+        self.pacdots_sprites = pygame.sprite.Group()
+        
+        #accordingly screen resolution, filling it with plain pac-dots(pac_dot.png (3x3))
+        for x in range(4,int(self.width)/20-3):
+            for y in range(4,int(self.height)/20-3):
+                self.pacdots_sprites.add(models.PacDot(pygame.Rect(x*20, y*20, 3, 3)))
+
     def __load_sprites(self):
         #getting pacman character sprite
         self.pacman = models.Pacman()
         self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman)) 
+        
         #getting enemies characters sprites
         self.blinky = models.Enemy("blinky.png", self.width/2, self.height/2)
         self.blinky_sprite = pygame.sprite.RenderPlain((self.blinky))
@@ -33,14 +142,6 @@ class Game:
 
         self.clyde = models.Enemy("clyde.png", self.width/2+30, self.height/2+30)
         self.clyde_sprite = pygame.sprite.RenderPlain((self.clyde))
-
-        #initialize sprites group 
-        self.pacdots_sprites = pygame.sprite.Group()
-        
-        #accordingly screen resolution, filling it with plain pac-dots(pac_dot.png (3x3))
-        for x in range(1,int(self.width/15)):
-            for y in range(1,int(self.height/15)):
-                self.pacdots_sprites.add(models.PacDot(pygame.Rect(x*15, y*15, 3, 3)))
     
     def __set_backgrnd(self):
         # add background on the screen
@@ -48,13 +149,16 @@ class Game:
         self.background = self.background.convert()
         self.background.fill((0, 0, 0))
 
-
     def main_loop(self):
         #getting clock to control frame rate
         self.clock = pygame.time.Clock()
         
         #loading sprites
         self.__load_sprites()
+        #loading wall sprites
+        self.__load_wall_sprites()
+        #loading pac dots
+        self.__load_pac_dots()
         #setting background
         self.__set_backgrnd()
 
@@ -91,6 +195,7 @@ class Game:
             
             #draw sprites
             self.pacdots_sprites.draw(self.screen)
+            self.wall_sprites.draw(self.screen)
             self.pacman_sprite.draw(self.screen)
             self.blinky_sprite.draw(self.screen)
             self.pinky_sprite.draw(self.screen)
