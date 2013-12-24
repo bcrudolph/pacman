@@ -171,12 +171,12 @@ class Game:
 
                         (x_offset+wall_width,
                          y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2+2*config.portal_width,
-                         (self.width-4*x_offset)/wall_divider,
+                         2*(self.width-2*x_offset)/wall_divider-wall_width/2,
                          wall_width), # bottom left portal block
 
-                        (x_offset+2*wall_width+6*config.aisle_width+4*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider+wall_width/2,
+                        (x_offset+wall_width+6*config.aisle_width+3*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider+wall_width/2,
                          y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2+2*config.portal_width,
-                         (self.width-4*x_offset)/wall_divider,
+                         (self.width-4*x_offset)/wall_divider+wall_width+(self.width-2*x_offset)/wall_divider+wall_width/2,
                          wall_width), # bottom right right block
 
                         (x_offset+wall_width+config.aisle_width,
@@ -207,7 +207,19 @@ class Game:
                         (x_offset+wall_width+3*config.aisle_width+4*(self.width-2*x_offset)/wall_divider+(self.width-4*x_offset)/wall_divider-1,
                         y_offset+3*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
                         wall_width,
-                        ((self.width-2*x_offset)/wall_divider)/3), #vertical left block for under portal line blocks
+                        ((self.width-2*x_offset)/wall_divider)/3) #vertical left block for under portal line blocks
+
+                        ## enemy center box
+
+                        #(x_offset+wall_width+2*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         #y_offset+4*wall_width+config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                         #(self.width-2*x_offset)/wall_divider,
+                        #wall_width/3), #top line
+
+                         #(x_offset+wall_width+2*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
+                         #y_offset+11*wall_width/2-1+config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                         #(self.width-2*x_offset)/wall_divider,
+                        #wall_width/3), #top line
 
                     ]
 
