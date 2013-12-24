@@ -12,6 +12,6 @@ enemy_dir = os.path.join(img_dir,"enemy")
 screen_width = 640
 screen_height = 480
 
-portal_width = 20
+portal_width = 25
 aisle_width = 25
 aisle_height = 25

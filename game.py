@@ -107,9 +107,109 @@ class Game:
                         (x_offset+wall_width+3*config.aisle_width+2*(self.width-2*x_offset)/wall_divider,
                         y_offset+5*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
                         wall_width,
-                        ((self.width-2*x_offset)/wall_divider)/3) #center column block 3(vertical part)
+                        ((self.width-2*x_offset)/wall_divider)/3), #center column block 3(vertical part)
 
-        ]
+                        (x_offset+wall_width+config.aisle_width,
+                         y_offset+9*wall_width/2+5*(self.width-2*x_offset)/wall_divider/3+2*config.aisle_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #1 under portal line block
+
+                        (x_offset+2*config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                         y_offset+9*wall_width/2+5*(self.width-2*x_offset)/wall_divider/3+2*config.aisle_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #2 under portal line block
+
+                        (x_offset+3*wall_width+4*config.aisle_width+3*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider,
+                         y_offset+9*wall_width/2+5*(self.width-2*x_offset)/wall_divider/3+2*config.aisle_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #3 under portal line block
+
+                        (x_offset+2*wall_width+5*config.aisle_width+4*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider,
+                         y_offset+9*wall_width/2+5*(self.width-2*x_offset)/wall_divider/3+2*config.aisle_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #4 under portal line block
+
+                        (x_offset+2*config.aisle_width+(self.width-2*x_offset)/wall_divider+wall_width,
+                         y_offset+wall_width+5*(self.width-2*x_offset)/wall_divider/3,
+                         (self.width-4*x_offset)/wall_divider - wall_width,
+                         wall_width), #horizontal part of left vertical T - block
+
+                        (x_offset+3*wall_width+4*config.aisle_width+2*(self.width-2*x_offset)/wall_divider+(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider,
+                         y_offset+wall_width+5*(self.width-2*x_offset)/wall_divider/3,
+                         (self.width-4*x_offset)/wall_divider - wall_width,
+                         wall_width), #horizontal part of right vertical T - block
+
+                        (x_offset+2*config.aisle_width+(self.width-2*x_offset)/wall_divider,
+                        y_offset+wall_width+4*(self.width-2*x_offset)/wall_divider/3,
+                        wall_width,
+                        (self.width-2*x_offset)/wall_divider), #vertical part of right vertical T -block
+
+                        (x_offset+2*wall_width+4*config.aisle_width+3*(self.width-2*x_offset)/wall_divider-1,
+                        y_offset+wall_width+4*(self.width-2*x_offset)/wall_divider/3,
+                        wall_width,
+                        (self.width-2*x_offset)/wall_divider), #vertical part of left vertical T -block
+
+                        (x_offset+wall_width+config.aisle_width,
+                         y_offset+4*wall_width+(self.width-2*x_offset)/wall_divider/2,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #1 under first line left block
+
+                        (x_offset+2*wall_width+5*config.aisle_width+4*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider,
+                         y_offset+4*wall_width+(self.width-2*x_offset)/wall_divider/2,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), #2 under first line right block
+
+                         (x_offset+wall_width,
+                         y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), # top left portal block
+
+                        (x_offset+2*wall_width+6*config.aisle_width+4*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider+wall_width/2,
+                         y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), # top right right block
+
+                        (x_offset+wall_width,
+                         y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2+2*config.portal_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), # bottom left portal block
+
+                        (x_offset+2*wall_width+6*config.aisle_width+4*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider+wall_width/2,
+                         y_offset+13*wall_width/2+(self.width-2*x_offset)/wall_divider/2+2*config.portal_width,
+                         (self.width-4*x_offset)/wall_divider,
+                         wall_width), # bottom right right block
+
+                        (x_offset+wall_width+config.aisle_width,
+                         y_offset+13*wall_width/2+2*(self.width-2*x_offset)/wall_divider+2*config.aisle_width,
+                         2*(self.width-4*x_offset)/wall_divider+config.aisle_width,
+                         wall_width), #left under bottom line block
+
+                        (x_offset+3*wall_width+4*config.aisle_width+3*(self.width-2*x_offset)/wall_divider-(self.width-4*x_offset)/wall_divider,
+                         y_offset+13*wall_width/2+2*(self.width-2*x_offset)/wall_divider+2*config.aisle_width,
+                         2*(self.width-4*x_offset)/wall_divider+config.aisle_width,
+                         wall_width), #right under bottom line block
+
+                        (x_offset+wall_width+2*config.aisle_width+(self.width-4*x_offset)/wall_divider,
+                        y_offset+4*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
+                        wall_width,
+                        ((self.width-2*x_offset)/wall_divider)/3), #vertical block for under bottom right line
+
+                        (x_offset+wall_width+2*config.aisle_width+4*(self.width-2*x_offset)/wall_divider,
+                        y_offset+4*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
+                        wall_width,
+                        ((self.width-2*x_offset)/wall_divider)/3), #vertical block for under bottom left line
+
+                        (x_offset+wall_width+config.aisle_width,
+                        y_offset+3*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
+                        wall_width,
+                        ((self.width-2*x_offset)/wall_divider)/3), #vertical right block for under portal line blocks
+
+                        (x_offset+wall_width+3*config.aisle_width+4*(self.width-2*x_offset)/wall_divider+(self.width-4*x_offset)/wall_divider-1,
+                        y_offset+3*wall_width+5*(self.width-2*x_offset)/wall_divider/3+4*config.aisle_width,
+                        wall_width,
+                        ((self.width-2*x_offset)/wall_divider)/3), #vertical left block for under portal line blocks
+
+                    ]
 
         self.wall_sprites = pygame.sprite.Group()
 
