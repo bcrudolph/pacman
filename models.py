@@ -22,12 +22,9 @@ class Pacman(pygame.sprite.Sprite):
         self.pac_dots = 0
         self.flash_dots = 0
 
-        # current position
-        self.x_pos = 0
-        self.y_pos = 0 
         #one step is a 5 pixels
-        self.x_step = 5
-        self.y_step = 5
+        self.x_step = init_x
+        self.y_step = init_y
         
         #path to frames
         self.anim = glob.glob(config.pacman_dir+"/*.png")
@@ -54,25 +51,45 @@ class Pacman(pygame.sprite.Sprite):
             else:
                 self.anim_num += 1
 
+    def __walk(self, x_s, y_s):
+        self.x_step += x_s
+        self.y_step += y_s
     #TODO
     def __spin(self):
         center = self.rect.center
 
-    def move(self, key):
+    def move(self,walls, key):
         if key == K_RIGHT:
-            self.x_pos += self.x_step
+            self.__walk(5,0)
             self.__anim_update()
         elif key == K_LEFT:
-            self.x_pos -= self.x_step
+            self.__walk(-5,0)
             self.__anim_update()
         elif key == K_UP:
-            self.y_pos -= self.y_step 
+            self.__walk(0,-5)
             self.__anim_update()
         elif key == K_DOWN:
-            self.y_pos += self.y_step
+            self.__walk(0, 5)
             self.__anim_update()
 
-        self.rect.move_ip(self.x_pos, self.y_pos)
+        self.rect.x += self.x_step
+
+        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
+        for block in blocks_hit:
+            if self.x_step < 0:
+                self.rect.right = block.rect.left
+            else:
+                self.rect.left = block.rect.right
+
+        self.rect.y += self.y_step
+
+        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
+        for block in blocks_hit:
+            if self.y_step < 0:
+                self.rect.bottom = block.rect.top
+            else:
+                self.rect.top = block.rect.bottom
+
 
 class PacDot(pygame.sprite.Sprite):
     def __init__(self, rect=None):
@@ -104,17 +121,28 @@ class Enemy(pygame.sprite.Sprite):
         angle = random.randint(-45,45)
 
 
-    def move(self):
+    def move(self, walls):
         self.rect.x += self.x_step
+
+        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
+        for block in blocks_hit:
+            if self.rect.left < block.rect.left:
+                self.rect.right = block.rect.left
+                self.x_step=-self.x_step
+            elif self.rect.right > block.rect.right:
+                self.rect.left = block.rect.right
+                self.x_step=-self.x_step
+
         self.rect.y += self.y_step
 
-        if self.rect.left < self.area.left or\
-            self.rect.right > self.area.right:
-            self.x_step = -self.x_step
-
-        if self.rect.top < self.area.top or\
-            self.rect.bottom > self.area.bottom:
-            self.y_step = -self.y_step
+        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
+        for block in blocks_hit:
+            if self.rect.top < block.rect.top:
+                self.rect.bottom = block.rect.top
+                self.y_step=-self.y_step
+            elif self.rect.bottom > block.rect.bottom:
+                self.rect.top = block.rect.bottom
+                self.y_step=-self.y_step
 
 
 class Wall(pygame.sprite.Sprite):

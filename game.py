@@ -239,20 +239,21 @@ class Game:
 
     def __load_sprites(self):
         #getting pacman character sprite
-        self.pacman = models.Pacman()
-        self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman)) 
+        self.pacman = models.Pacman(50+3*config.aisle_width+2*(self.width-80)/6,
+                                     self.height/2+(self.width-150)/6)
+        self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman))
         
         #getting enemies characters sprites
         self.blinky = models.Enemy("blinky.png", self.width/2, self.height/2)
         self.blinky_sprite = pygame.sprite.RenderPlain((self.blinky))
 
-        self.pinky = models.Enemy("pinky.png", self.width/2+10, self.height/2+10)
+        self.pinky = models.Enemy("pinky.png", self.width/2, self.height/2+15)
         self.pinky_sprite = pygame.sprite.RenderPlain((self.pinky))
 
-        self.inky = models.Enemy("inky.png", self.width/2+20, self.height/2+20)
+        self.inky = models.Enemy("inky.png", self.width/2, self.height/2+30)
         self.inky_sprite = pygame.sprite.RenderPlain((self.inky))
 
-        self.clyde = models.Enemy("clyde.png", self.width/2+30, self.height/2+30)
+        self.clyde = models.Enemy("clyde.png", self.width/2, self.height/2+45)
         self.clyde_sprite = pygame.sprite.RenderPlain((self.clyde))
     
     def __set_backgrnd(self):
@@ -286,13 +287,13 @@ class Game:
                             or event.key == K_LEFT \
                             or event.key == K_UP \
                             or event.key == K_DOWN:
-                                self.pacman.move(event.key)
+                                self.pacman.move(self.wall_sprites,event.key)
             
             # enemies random move
-            self.blinky.move()
-            self.pinky.move()
-            self.inky.move()
-            self.clyde.move()
+            self.blinky.move(self.wall_sprites)
+            self.inky.move(self.wall_sprites)
+            self.clyde.move(self.wall_sprites)
+            self.pinky.move(self.wall_sprites)
 
             #check collisions True means: kill sprite from group in collision
             pacman_dots_cols = pygame.sprite.spritecollide(self.pacman,
