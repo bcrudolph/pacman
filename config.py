@@ -9,9 +9,6 @@ img_dir = os.path.join(data_dir, "img")
 pacman_dir = os.path.join(img_dir,"pacman")
 enemy_dir = os.path.join(img_dir,"enemy")
 
-screen_width = 640
-screen_height = 480
-
-portal_width = 25
-aisle_width = 25
-aisle_height = 25
+screen_width = 500
+screen_height = 575
+block_size = 24

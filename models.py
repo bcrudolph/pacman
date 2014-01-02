@@ -8,152 +8,136 @@ from pygame.locals import *
 import utils
 import config
 
+
+class BasicSprite(pygame.sprite.Sprite):
+    """
+    Basic sprite class for all models
+    """
+    def __init__(self, center_point, image_path, colorkey = None):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = utils.load_image(image_path, colorkey)
+        self.rect.center = center_point
+
+
+#inheritance from pygame.sprite.Sprite cause pacman is an animation
 class Pacman(pygame.sprite.Sprite):
     """
     Pacman class.This is general character of the game
     """
-    def __init__(self, init_x = 0,init_y = 0):
-        pygame.sprite.Sprite.__init__(self)
-        
-        self.screen = pygame.display.get_surface()
-        self.area = self.screen.get_rect()
-        
-        #number of eaten pacdots
-        self.pac_dots = 0
-        self.flash_dots = 0
 
-        #one step is a 5 pixels
-        self.x_step = init_x
-        self.y_step = init_y
-        
+    def __init__(self, center_point, frame_list_path):
+        pygame.sprite.Sprite.__init__(self)
+
         #path to frames
-        self.anim = glob.glob(config.pacman_dir+"/*.png")
+        self.anim = glob.glob(frame_list_path)
         self.anim.sort()
-        
-        #animation speed
-        #self.anim_speed_init = 5
-        #self.anim_speed = self.anim_speed_init
-        
+
         #animation position
         self.anim_num = 0
-        self.anim_max  = len(self.anim)-1
+        self.anim_max = len(self.anim)-1
 
         #download an image
         self.image, self.rect = utils.load_image(self.anim[0], -1)
-        self.rect.topleft = init_x, init_y
+        self.rect.center = center_point
+
+        #number of eaten pellets
+        self.pellets = 0
+        self.score = 0
+        #each time step
+        self.step = 3
+        self.x_step = 0
+        self.y_step = 0
+
+        self.dir = 0
+        self.x_dir = [0, self.step, -self.step, 0, 0]
+        self.y_dir = [0, 0, 0, -self.step, self.step]
 
     def __anim_update(self):
-            #self.anim_speed -= 1
-            self.image, self.rect = utils.load_image(self.anim[self.anim_num], -1)
-        #self.anim_speed = self.anim_speed_init
-            if self.anim_num == self.anim_max:
-                self.anim_num = 0
-            else:
-                self.anim_num += 1
+        self.image, self.rect = utils.load_image(self.anim[self.anim_num], -1)
+        if self.anim_num == self.anim_max:
+            self.anim_num = 0
+        else:
+            self.anim_num += 1
 
-    def __walk(self, x_s, y_s):
-        self.x_step += x_s
-        self.y_step += y_s
     #TODO
     def __spin(self):
         center = self.rect.center
+    def __step(self, dir):
+        self.x_step = self.x_dir[dir]
+        self.y_step = self.y_dir[dir]
 
-    def move(self,walls, key):
+        self.rect.x += self.x_step
+        self.rect.y += self.y_step
+
+    def move(self, blocks, key):
+
         if key == K_RIGHT:
-            self.__walk(5,0)
-            self.__anim_update()
+            self.dir = 1
+           # self.__anim_update()
         elif key == K_LEFT:
-            self.__walk(-5,0)
-            self.__anim_update()
+            self.dir = 2
+            #self.__anim_update()
         elif key == K_UP:
-            self.__walk(0,-5)
-            self.__anim_update()
+            self.dir = 3
+            #self.__anim_update()
         elif key == K_DOWN:
-            self.__walk(0, 5)
-            self.__anim_update()
+            self.dir = 4
+            #self.__anim_update()
 
-        self.rect.x += self.x_step
+        self.__step(self.dir)
 
-        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
-        for block in blocks_hit:
-            if self.x_step < 0:
-                self.rect.right = block.rect.left
-            else:
-                self.rect.left = block.rect.right
+        if pygame.sprite.spritecollide(self, blocks, False):
+            self.rect.x -= self.x_step
+            self.rect.y -= self.y_step
+            self.step = 0
+            self.dir = 0
 
-        self.rect.y += self.y_step
-
-        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
-        for block in blocks_hit:
-            if self.y_step < 0:
-                self.rect.bottom = block.rect.top
-            else:
-                self.rect.top = block.rect.bottom
-
-
-class PacDot(pygame.sprite.Sprite):
-    def __init__(self, rect=None):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = utils.load_image(os.path.join(config.img_dir,"pac_dot.png"))
-        if rect != None:
-            self.rect = rect
-
-class Enemy(pygame.sprite.Sprite):
+class Enemy(BasicSprite):
     '''
-    Enemies class for blinky, pinky, clyde, inky
+    Enemy class for blinky, pinky, clyde, inky
     '''
-    def __init__(self, pathname, init_pos_x = 0, init_pos_y = 0):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = utils.load_image(os.path.join(config.enemy_dir, pathname),-1)
 
-        self.screen = pygame.display.get_surface()
-        self.area = self.screen.get_rect()
+    def __init__(self, center_point, image_path, colorkey = None):
+        super(Enemy, self).__init__(center_point, image_path, colorkey)
 
-        self.scr_width = self.screen.get_width()
-        self.scr_height = self.screen.get_height()
+        self.image, self.rect = utils.load_image(image_path, colorkey)
+        self.rect.center = center_point
 
-        self.rect.topleft = init_pos_x, init_pos_y
+        self.step = 2
 
-        self.x_step = 2
-        self.y_step = 2
+        self.x_move = 0
+        self.y_move = 0
 
-    def __serve(self):
-        angle = random.randint(-45,45)
+        self.dir = 1
+        self.next_dir = 3
+        self.x_dir = [0, self.step, -self.step, 0, 0]
+        self.y_dir = [0, 0, 0, -self.step, self.step]
+
+    def __step(self, dir):
+        self.x_move = self.x_dir[dir]
+        self.y_move = self.y_dir[dir]
+    ##magic everywhere below!!! 
+    def move(self, blocks):
+        self.__step(self.next_dir)
+        self.rect.move_ip(self.x_move,self.y_move)
+
+        if pygame.sprite.spritecollide(self, blocks, False):
+            self.rect.move_ip(-self.x_move,-self.y_move)
+            self.__step(self.dir)
+            self.rect.move_ip(self.x_move, self.y_move)
+
+            if pygame.sprite.spritecollide(self, blocks, False):
+                self.rect.move_ip(-self.x_move,-self.y_move)
+                if self.next_dir < 3:
+                    self.next_dir = random.randint(3,4)
+                else:
+                    self.next_dir = random.randint(1,2)
+        else:
+            self.dir = self.next_dir
+            if self.next_dir < 3:
+                self.next_dir = random.randint(3,4)
+            else:
+                self.next_dir = random.randint(1,2)
 
 
-    def move(self, walls):
-        self.rect.x += self.x_step
-
-        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
-        for block in blocks_hit:
-            if self.rect.left < block.rect.left:
-                self.rect.right = block.rect.left
-                self.x_step=-self.x_step
-            elif self.rect.right > block.rect.right:
-                self.rect.left = block.rect.right
-                self.x_step=-self.x_step
-
-        self.rect.y += self.y_step
-
-        blocks_hit = pygame.sprite.spritecollide(self, walls, False)
-        for block in blocks_hit:
-            if self.rect.top < block.rect.top:
-                self.rect.bottom = block.rect.top
-                self.y_step=-self.y_step
-            elif self.rect.bottom > block.rect.bottom:
-                self.rect.top = block.rect.bottom
-                self.y_step=-self.y_step
-
-
-class Wall(pygame.sprite.Sprite):
-    def __init__(self,x, y, width, height):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.image = pygame.Surface([width, height])
-        #fill image with blue color
-        self.image.fill((0,0,255))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
 
