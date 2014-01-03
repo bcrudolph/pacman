@@ -31,13 +31,17 @@ class Pacman(pygame.sprite.Sprite):
         #path to frames
         self.anim = glob.glob(frame_list_path)
         self.anim.sort()
+        self.anim_horizontal = self.anim[:4]
+        self.anim_vertical = self.anim[4:]
 
-        #animation position
-        self.anim_num = 0
-        self.anim_max = len(self.anim)-1
+        #maximum number of frames
+        self.anim_max = len(self.anim[:4])-1
+        self.anim_num_h = 0
+        self.anim_num_v = 0
 
         #download an image
         self.image, self.rect = utils.load_image(self.anim[0], -1)
+
         self.rect.center = center_point
 
         #number of eaten pellets
@@ -52,38 +56,50 @@ class Pacman(pygame.sprite.Sprite):
         self.x_dir = [0, self.step, -self.step, 0, 0]
         self.y_dir = [0, 0, 0, -self.step, self.step]
 
-    def __anim_update(self):
-        self.image, self.rect = utils.load_image(self.anim[self.anim_num], -1)
-        if self.anim_num == self.anim_max:
-            self.anim_num = 0
+    def __anim_update_h(self):
+        self.image = pygame.image.load(self.anim_horizontal[self.anim_num_h])
+        if self.anim_num_h == self.anim_max:
+            self.anim_num_h = 0
         else:
-            self.anim_num += 1
+            self.anim_num_h += 1
 
-    #TODO
-    def __spin(self):
+    def __anim_update_v(self):
+        self.image = pygame.image.load(self.anim_vertical[self.anim_num_v])
+        if self.anim_num_v == self.anim_max:
+            self.anim_num_v = 0
+        else:
+            self.anim_num_v += 1
+
+    def __spin(self, key):
+        if key == K_LEFT:
+            self.image = pygame.transform.flip(self.image, 1, 0)
+        if key == K_UP:
+            self.image = pygame.transform.flip(self.image, 0, 1)
+
         center = self.rect.center
+
     def __step(self, dir):
         self.x_step = self.x_dir[dir]
         self.y_step = self.y_dir[dir]
 
-        #self.rect.x += self.x_step
-        #self.rect.y += self.y_step
-        self.rect.move_ip(self.x_step, self.y_step)
+        self.rect.x += self.x_step
+        self.rect.y += self.y_step
 
     def move(self, blocks, key):
-
         if key == K_RIGHT:
             self.dir = 1
-           # self.__anim_update()
+            self.__anim_update_h()
         elif key == K_LEFT:
             self.dir = 2
-            #self.__anim_update()
+            self.__anim_update_h()
+            self.__spin(key)
         elif key == K_UP:
             self.dir = 3
-            #self.__anim_update()
+            self.__anim_update_v()
+            self.__spin(key)
         elif key == K_DOWN:
             self.dir = 4
-            #self.__anim_update()
+            self.__anim_update_v()
 
         self.__step(self.dir)
 

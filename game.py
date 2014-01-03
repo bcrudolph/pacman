@@ -10,9 +10,49 @@ from menu import *
 
 def main_menu(screen):
     menu = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
-                 [('start game', 1, None),
-                    ('exit', 2, None)])
+                 [('START GAME', 1, None),
+                    ('EXIT', 2, None)])
 
+    menu.set_center(True, True)
+    menu.set_alignment('center', 'center')
+
+    state = 0
+    previos_state = 1
+
+    #list for rects to update
+    rect_lst = list()
+    #block mouse motion for better perfomance
+    pygame.event.set_blocked(pygame.MOUSEMOTION)
+
+    while True:
+        if previos_state != state:
+            background, temp = utils.load_image(os.path.join(config.img_dir,"background.jpg"))
+            screen.blit(background,(0,0))
+            pygame.display.flip()
+
+            # put event to the end of the event queue
+            pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
+            previos_state = state
+
+        #wait for new event
+        ev = pygame.event.wait()
+
+        if ev.type == pygame.KEYDOWN or ev.type == EVENT_CHANGE_STATE:
+            if state == 0:
+                rect_lst, state = menu.update(ev, state)
+            elif state == 1:
+                break
+                state = 0
+            else:
+                pygame.quit()
+                sys.exit()
+
+        if ev.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        pygame.display.update(rect_lst)
+    return True
 class Game:
     def __init__(self, width = config.screen_width, height = config.screen_height):
         # initialization all pygame modules
@@ -38,11 +78,15 @@ class Game:
         self.sounds['intro'].play()
 
         ##gameplay variables
-        self.enemy_max_cols = 3
+        self.enemy_max_cols = 3 # equal to pacman.lives
         self.enemy_cols = 0
         self.prev_life_score = 0
+        self.lives_cntr = 3
+        self.max_pellets = 181
         #magic break const for manipulation with user actions
         self.break_flag = False
+        #bool var for check enabled menu or not
+        self.set_menu = False
 
     def __load_sprites(self):
         x_offset = (config.block_size/2)
@@ -92,13 +136,38 @@ class Game:
         self.background = self.background.convert()
         self.background.fill(config.BLACK)
 
+    def __big_event_handler(self, event_text):
+        self.screen.blit(self.background, (0, 0))
+
+        utils.draw_text(event_text,
+                        self.font48,
+                        self.screen,
+                        config.screen_width/2,
+                        config.screen_height/5)
+        for e in pygame.event.get():
+            if e.key == ord('y'):
+                self.break_flag = True
+                #we lost all lives or we won and trying to play again
+                # so initialize all score variables again with zero
+                self.pacman.pellets = 0
+                self.pacman.score = 0
+                self.prev_life_score = 0
+                self.lives_cntr = 3
+            elif e.key == ord('n'):
+                pygame.quit()
+                sys.exit()
+
     def main_loop(self):
-        #getting clock to control frame rate
         self.clock = pygame.time.Clock()
-        
+        if not self.set_menu:
+            self.set_menu = main_menu(self.screen)
+
+        #getting clock to control frame rate
+
         #loading sprites
         self.__load_sprites()
         self.pacman.score = self.prev_life_score
+        self.pacman.lives = self.lives_cntr
         #setting background
         self.__set_backgrnd()
 
@@ -128,32 +197,19 @@ class Game:
                 pygame.sprite.collide_rect(self.inky, self.pacman) or\
                 pygame.sprite.collide_rect(self.clyde, self.pacman) or\
                 pygame.sprite.collide_rect(self.pinky, self.pacman):
+                #we have collision with ghost so increment ghost collision counter
+                #and drop to zero number of eaten pellets
                 self.enemy_cols += 1
+                self.pacman.pellets = 0
                 #if we lost 3 lives game over and ask for playing again
                 if self.enemy_cols == self.enemy_max_cols:
                     self.enemy_cols = 0
                     while True:
-                        self.screen.blit(self.background, (0, 0))
-
-                        utils.draw_text("Play again?",
-                                        self.font48,
-                                        self.screen,
-                                        config.screen_width/2,
-                                        config.screen_height/5)
-                        for e in pygame.event.get():
-                            if e.key == ord('y'):
-                                self.break_flag = True
-                                self.pacman.pellets = 0
-                                self.pacman.score = 0
-                                self.prev_life_score = 0
-                            elif e.key == ord('n'):
-                                pygame.quit()
-                                sys.exit()
+                        self.__big_event_handler("You lost. Play again (y/n)?")
                         if self.break_flag:
                             break
                         pygame.display.flip()
 
-                    #sys.exit()
                 #going out from loop and restart it
                 break
 
@@ -163,6 +219,12 @@ class Game:
             for dot in pacman_pellets_cols:
                 self.pacman.pellets += 1
                 self.pacman.score += 10
+                if self.pacman.pellets == self.max_pellets:
+                    while True:
+                        self.__big_event_handler("You Won!!! Play again (y/n)?")
+                        if self.break_flag:
+                            break
+                        pygame.display.flip()
 
             #adding background on the screen
             self.screen.blit(self.background, (0, 0))
@@ -180,13 +242,21 @@ class Game:
                             self.screen,
                             70,
                             20)
+            utils.draw_text("Lives: %d "%self.lives_cntr,
+                            self.font30,
+                            self.screen,
+                            270,
+                            20)
 
             pygame.display.flip()
             self.clock.tick(40)
         if  not self.break_flag:
             self.sounds['die'].play()
+            #we killed ,so minus one life
+            #and we need to save previos score cause after start main loop below
+            #self.pacman.score variable will be initialized with zero again
+            self.lives_cntr -= 1
             self.prev_life_score = self.pacman.score
         self.main_loop()
-
 
 
