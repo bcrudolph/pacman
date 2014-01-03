@@ -1,9 +1,17 @@
 #!/usr/bin/env python 
 import os, sys, pygame
 from pygame.locals import *
-import models
+
 import config
+import utils
 import level001
+import models
+from menu import *
+
+def main_menu(screen):
+    menu = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
+                 [('start game', 1, None),
+                    ('exit', 2, None)])
 
 class Game:
     def __init__(self, width = config.screen_width, height = config.screen_height):
@@ -16,6 +24,25 @@ class Game:
         pygame.mouse.set_visible(0)
         #set repetition  (set_repeat(after first keydown, after any other))
         pygame.key.set_repeat(30,30)
+
+        #text font
+        self.font48 = pygame.font.SysFont(None, 48)
+        self.font30 = pygame.font.SysFont(None, 30)
+
+        ##sounds
+        pygame.mixer.init()
+        self.sounds = {'die': pygame.mixer.Sound(os.path.join(config.snd_dir, "die.ogg")),
+                        'intro': pygame.mixer.Sound(os.path.join(config.snd_dir, "intro.ogg"))}
+
+        ##intro music
+        self.sounds['intro'].play()
+
+        ##gameplay variables
+        self.enemy_max_cols = 3
+        self.enemy_cols = 0
+        self.prev_life_score = 0
+        #magic break const for manipulation with user actions
+        self.break_flag = False
 
     def __load_sprites(self):
         x_offset = (config.block_size/2)
@@ -63,7 +90,7 @@ class Game:
         # add background on the screen
         self.background = pygame.Surface(self.screen.get_size())
         self.background = self.background.convert()
-        self.background.fill((0, 0, 0))
+        self.background.fill(config.BLACK)
 
     def main_loop(self):
         #getting clock to control frame rate
@@ -71,6 +98,7 @@ class Game:
         
         #loading sprites
         self.__load_sprites()
+        self.pacman.score = self.prev_life_score
         #setting background
         self.__set_backgrnd()
 
@@ -78,11 +106,10 @@ class Game:
         self.gwall_sprites.draw(self.background)
 
         while True:
-            #60 FPS
-            self.clock.tick(60)
-
+            self.break_flag = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    pygame.quit()
                     sys.exit()
                 elif event.type is KEYDOWN:
                     if event.key == K_RIGHT \
@@ -97,13 +124,45 @@ class Game:
             self.clyde.move(self.block_sprites)
             self.pinky.move(self.block_sprites)
 
+            if pygame.sprite.collide_rect(self.blinky, self.pacman) or\
+                pygame.sprite.collide_rect(self.inky, self.pacman) or\
+                pygame.sprite.collide_rect(self.clyde, self.pacman) or\
+                pygame.sprite.collide_rect(self.pinky, self.pacman):
+                self.enemy_cols += 1
+                #if we lost 3 lives game over and ask for playing again
+                if self.enemy_cols == self.enemy_max_cols:
+                    self.enemy_cols = 0
+                    while True:
+                        self.screen.blit(self.background, (0, 0))
+
+                        utils.draw_text("Play again?",
+                                        self.font48,
+                                        self.screen,
+                                        config.screen_width/2,
+                                        config.screen_height/5)
+                        for e in pygame.event.get():
+                            if e.key == ord('y'):
+                                self.break_flag = True
+                                self.pacman.pellets = 0
+                                self.pacman.score = 0
+                                self.prev_life_score = 0
+                            elif e.key == ord('n'):
+                                pygame.quit()
+                                sys.exit()
+                        if self.break_flag:
+                            break
+                        pygame.display.flip()
+
+                    #sys.exit()
+                #going out from loop and restart it
+                break
+
             #check collisions True means: kill sprite from group in collision
-            pacman_pellets_cols = pygame.sprite.spritecollide(self.pacman,
-                                                            self.pellet_sprites,
-                                                          True)
+            pacman_pellets_cols = pygame.sprite.spritecollide(self.pacman, self.pellet_sprites, True)
             #count score 
             for dot in pacman_pellets_cols:
                 self.pacman.pellets += 1
+                self.pacman.score += 10
 
             #adding background on the screen
             self.screen.blit(self.background, (0, 0))
@@ -115,6 +174,19 @@ class Game:
             self.pinky_sprite.draw(self.screen)
             self.inky_sprite.draw(self.screen)
             self.clyde_sprite.draw(self.screen)
+
+            utils.draw_text("Score: %d "%self.pacman.score,
+                            self.font30,
+                            self.screen,
+                            70,
+                            20)
+
             pygame.display.flip()
-                    
+            self.clock.tick(40)
+        if  not self.break_flag:
+            self.sounds['die'].play()
+            self.prev_life_score = self.pacman.score
+        self.main_loop()
+
+
 

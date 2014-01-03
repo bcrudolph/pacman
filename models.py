@@ -44,7 +44,7 @@ class Pacman(pygame.sprite.Sprite):
         self.pellets = 0
         self.score = 0
         #each time step
-        self.step = 3
+        self.step = 4
         self.x_step = 0
         self.y_step = 0
 
@@ -66,8 +66,9 @@ class Pacman(pygame.sprite.Sprite):
         self.x_step = self.x_dir[dir]
         self.y_step = self.y_dir[dir]
 
-        self.rect.x += self.x_step
-        self.rect.y += self.y_step
+        #self.rect.x += self.x_step
+        #self.rect.y += self.y_step
+        self.rect.move_ip(self.x_step, self.y_step)
 
     def move(self, blocks, key):
 
@@ -116,10 +117,11 @@ class Enemy(BasicSprite):
     def __step(self, dir):
         self.x_move = self.x_dir[dir]
         self.y_move = self.y_dir[dir]
-    ##magic everywhere below!!! 
+
+    ##magic for ghosts strategy
     def move(self, blocks):
         self.__step(self.next_dir)
-        self.rect.move_ip(self.x_move,self.y_move)
+        self.rect.move_ip(self.x_move, self.y_move)
 
         if pygame.sprite.spritecollide(self, blocks, False):
             self.rect.move_ip(-self.x_move,-self.y_move)
