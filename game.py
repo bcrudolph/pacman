@@ -94,25 +94,7 @@ class Game:
                 '''Get the center point for the rects'''
 
                 center_point = [(x*config.block_size)+x_offset, (y*config.block_size+y_offset)]
-                '''
-                res = {level.BLOCK:
-                           self.block_sprites.add(models.BasicSprite(center_point, images[level.BLOCK])),
-                       level.GWALL:
-                           self.gwall_sprites.add(models.BasicSprite(center_point, images[level.GWALL])),
-                       level.PACMAN:
-                           self.pac.append(models.Pacman(center_point, images[level.PACMAN])),
-                       level.PELLET:
-                           self.pellet_sprites.add(models.BasicSprite(center_point, images[level.PELLET], colorkey=-1)),
-                       level.BLINKY:
-                           self.enemies.append(models.Enemy(center_point, images[level.BLINKY], colorkey=-1)),
-                       level.INKY:
-                           self.enemies.append(models.Enemy(center_point, images[level.INKY], colorkey=-1)),
-                       level.PINKY:
-                           self.enemies.append(models.Enemy(center_point, images[level.PINKY], colorkey=-1)),
-                       level.CLYDE:
-                           self.enemies.append(models.Enemy(center_point, images[level.CLYDE], colorkey=-1))
-                }.get(layout[y][x], None)
-                '''
+             
                 if layout[y][x] == level.BLOCK:
                     self.block_sprites.add(models.BasicSprite(center_point, images[level.BLOCK]))
                 elif layout[y][x] == level.GWALL:
