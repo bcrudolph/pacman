@@ -88,13 +88,13 @@ class Game:
         #bool var for check enabled menu or not
         self.set_menu = False
 
-    def __set_map(self, x_offset, y_offset, level, layout, images):
+    def __load_level(self, x_offset, y_offset, level, layout, images):
         for y in range(len(layout)):
             for x in range(len(layout[y])):
                 '''Get the center point for the rects'''
 
                 center_point = [(x*config.block_size)+x_offset, (y*config.block_size+y_offset)]
-             
+
                 if layout[y][x] == level.BLOCK:
                     self.block_sprites.add(models.BasicSprite(center_point, images[level.BLOCK]))
                 elif layout[y][x] == level.GWALL:
@@ -129,7 +129,7 @@ class Game:
 
         #self.pac = list()
 
-        self.__set_map(x_offset, y_offset, level1, layout, images)
+        self.__load_level(x_offset, y_offset, level1, layout, images)
 
         #self.pacman = self.pac[0]
 
