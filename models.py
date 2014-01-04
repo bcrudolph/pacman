@@ -22,7 +22,7 @@ class BasicSprite(pygame.sprite.Sprite):
 #inheritance from pygame.sprite.Sprite cause pacman is an animation
 class Pacman(pygame.sprite.Sprite):
     """
-    Pacman class.This is general character of the game
+    Pacman class.This is the main character of the game
     """
 
     def __init__(self, center_point, frame_list_path):
@@ -41,7 +41,6 @@ class Pacman(pygame.sprite.Sprite):
 
         #download an image
         self.image, self.rect = utils.load_image(self.anim[0], -1)
-
         self.rect.center = center_point
 
         #number of eaten pellets
@@ -49,10 +48,6 @@ class Pacman(pygame.sprite.Sprite):
         self.score = 0
         #each time step
         self.step = 4
-        self.x_step = 0
-        self.y_step = 0
-
-        self.dir = 0
         self.x_dir = [0, self.step, -self.step, 0, 0]
         self.y_dir = [0, 0, 0, -self.step, self.step]
 
@@ -78,36 +73,40 @@ class Pacman(pygame.sprite.Sprite):
 
         center = self.rect.center
 
-    def __step(self, dir):
-        self.x_step = self.x_dir[dir]
-        self.y_step = self.y_dir[dir]
+    def __change_dir(self, dir):
+        return self.x_dir[dir], self.y_dir[dir]
 
-        self.rect.x += self.x_step
-        self.rect.y += self.y_step
+    def __step_front(self, *args):
+        self.rect.x += args[0]
+        self.rect.y += args[1]
+
+    def __step_back(self, *args):
+        self.rect.x -= args[0]
+        self.rect.y -= args[1]
 
     def move(self, blocks, key):
+        direction = 0
         if key == K_RIGHT:
-            self.dir = 1
+            direction = 1
             self.__anim_update_h()
         elif key == K_LEFT:
-            self.dir = 2
+            direction = 2
             self.__anim_update_h()
             self.__spin(key)
         elif key == K_UP:
-            self.dir = 3
+            direction = 3
             self.__anim_update_v()
             self.__spin(key)
         elif key == K_DOWN:
-            self.dir = 4
+            direction = 4
             self.__anim_update_v()
 
-        self.__step(self.dir)
+        x_step, y_step = self.__change_dir(direction)
+        self.__step_front(x_step, y_step)
 
         if pygame.sprite.spritecollide(self, blocks, False):
-            self.rect.x -= self.x_step
-            self.rect.y -= self.y_step
+            self.__step_back(x_step, y_step)
             self.step = 0
-            self.dir = 0
 
 class Enemy(BasicSprite):
     '''
@@ -122,30 +121,28 @@ class Enemy(BasicSprite):
 
         self.step = 2
 
-        self.x_move = 0
-        self.y_move = 0
-
+        #initial values for direction
         self.dir = 1
         self.next_dir = 3
+
         self.x_dir = [0, self.step, -self.step, 0, 0]
         self.y_dir = [0, 0, 0, -self.step, self.step]
 
     def __step(self, dir):
-        self.x_move = self.x_dir[dir]
-        self.y_move = self.y_dir[dir]
+        return self.x_dir[dir], self.y_dir[dir]
 
     ##magic for ghosts strategy
     def move(self, blocks):
-        self.__step(self.next_dir)
-        self.rect.move_ip(self.x_move, self.y_move)
+        x_move, y_move = self.__step(self.next_dir)
+        self.rect.move_ip(x_move, y_move)
 
         if pygame.sprite.spritecollide(self, blocks, False):
-            self.rect.move_ip(-self.x_move,-self.y_move)
-            self.__step(self.dir)
-            self.rect.move_ip(self.x_move, self.y_move)
+            self.rect.move_ip(-x_move, -y_move)
+            x_move, y_move = self.__step(self.dir)
+            self.rect.move_ip(x_move, y_move)
 
             if pygame.sprite.spritecollide(self, blocks, False):
-                self.rect.move_ip(-self.x_move,-self.y_move)
+                self.rect.move_ip(-x_move, -y_move)
                 if self.next_dir < 3:
                     self.next_dir = random.randint(3,4)
                 else:
@@ -156,6 +153,3 @@ class Enemy(BasicSprite):
                 self.next_dir = random.randint(3,4)
             else:
                 self.next_dir = random.randint(1,2)
-
-
-

@@ -1,4 +1,5 @@
 #!/usr/bin/env python 
+
 import os, sys, pygame
 from pygame.locals import *
 
@@ -27,11 +28,11 @@ def main_menu(screen):
     while True:
         if previos_state != state:
             background, temp = utils.load_image(os.path.join(config.img_dir,"background.jpg"))
-            screen.blit(background,(0,0))
+            screen.blit(background, (0,0))
             pygame.display.flip()
 
             # put event to the end of the event queue
-            pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key = 0))
+            pygame.event.post(pygame.event.Event(EVENT_CHANGE_STATE, key=0))
             previos_state = state
 
         #wait for new event
@@ -52,9 +53,10 @@ def main_menu(screen):
             sys.exit()
 
         pygame.display.update(rect_lst)
-    return True
+
+
 class Game:
-    def __init__(self, width = config.screen_width, height = config.screen_height):
+    def __init__(self, width=config.screen_width, height=config.screen_height):
         # initialization all pygame modules
         pygame.init()
 
@@ -83,8 +85,6 @@ class Game:
         self.prev_life_score = 0
         self.lives_cntr = 3
         self.max_pellets = 181
-        #magic break const for manipulation with user actions
-        self.break_flag = False
         #bool var for check enabled menu or not
         self.set_menu = False
 
@@ -100,35 +100,35 @@ class Game:
         self.gwall_sprites = pygame.sprite.Group()
         self.block_sprites = pygame.sprite.Group()
         self.pellet_sprites = pygame.sprite.Group()
+        #blinky, inky, pinky, clyde
+        self.enemies = list()
+        self.enemies_sprites = pygame.sprite.Group()
 
         for y in range(len(layout)):
             for x in range(len(layout[y])):
-
-                """Get the center point for the rects"""
+                '''Get the center point for the rects'''
 
                 center_point = [(x*config.block_size)+x_offset, (y*config.block_size+y_offset)]
                 if layout[y][x] == level1.BLOCK:
                     self.block_sprites.add(models.BasicSprite(center_point, images[level1.BLOCK]))
                 elif layout[y][x] == level1.GWALL:
                     self.gwall_sprites.add(models.BasicSprite(center_point, images[level1.GWALL]))
-                elif layout[y][x] == level1.PACMAN   :
+                elif layout[y][x] == level1.PACMAN:
                     self.pacman = models.Pacman(center_point, images[level1.PACMAN])
                 elif layout[y][x] == level1.PELLET:
                     self.pellet_sprites.add(models.BasicSprite(center_point, images[level1.PELLET], colorkey=-1))
-                elif layout[y][x]==level1.BLINKY:
-                    self.blinky = models.Enemy(center_point, images[level1.BLINKY], colorkey=-1)
-                elif layout[y][x]==level1.INKY:
-                    self.inky = models.Enemy(center_point, images[level1.INKY], colorkey=-1)
-                elif layout[y][x]==level1.PINKY:
-                    self.pinky = models.Enemy(center_point, images[level1.PINKY], colorkey=-1)
-                elif layout[y][x]==level1.CLYDE:
-                    self.clyde = models.Enemy(center_point, images[level1.CLYDE], colorkey=-1)
+                elif layout[y][x] == level1.BLINKY:
+                    self.enemies.append(models.Enemy(center_point, images[level1.BLINKY], colorkey=-1))
+                elif layout[y][x] == level1.INKY:
+                    self.enemies.append(models.Enemy(center_point, images[level1.INKY], colorkey=-1))
+                elif layout[y][x] == level1.PINKY:
+                    self.enemies.append(models.Enemy(center_point, images[level1.PINKY], colorkey=-1))
+                elif layout[y][x] == level1.CLYDE:
+                    self.enemies.append(models.Enemy(center_point, images[level1.CLYDE], colorkey=-1))
 
         self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman))
-        self.blinky_sprite = pygame.sprite.RenderPlain((self.blinky))
-        self.inky_sprite = pygame.sprite.RenderPlain((self.inky))
-        self.pinky_sprite = pygame.sprite.RenderPlain((self.pinky))
-        self.clyde_sprite = pygame.sprite.RenderPlain((self.clyde))
+        for ghost in self.enemies:
+            self.enemies_sprites.add(ghost)
 
     def __set_backgrnd(self):
         # add background on the screen
@@ -144,25 +144,34 @@ class Game:
                         self.screen,
                         config.screen_width/2,
                         config.screen_height/5)
+
         for e in pygame.event.get():
             if e.key == ord('y'):
-                self.break_flag = True
+                #self.break_flag = True
                 #we lost all lives or we won and trying to play again
                 # so initialize all score variables again with zero
                 self.pacman.pellets = 0
                 self.pacman.score = 0
                 self.prev_life_score = 0
                 self.lives_cntr = 3
+                self.main_loop()
             elif e.key == ord('n'):
-                pygame.quit()
-                sys.exit()
+                self.pacman.pellets = 0
+                self.pacman.score = 0
+                self.prev_life_score = 0
+                self.lives_cntr = 3
+                self.set_menu = False
+                self.main_loop()
+                #pygame.quit()
+                #sys.exit()
 
     def main_loop(self):
-        self.clock = pygame.time.Clock()
-        if not self.set_menu:
-            self.set_menu = main_menu(self.screen)
 
-        #getting clock to control frame rate
+        self.clock = pygame.time.Clock()
+
+        if not self.set_menu:
+            self.set_menu = True
+            main_menu(self.screen)
 
         #loading sprites
         self.__load_sprites()
@@ -175,28 +184,19 @@ class Game:
         self.gwall_sprites.draw(self.background)
 
         while True:
-            self.break_flag = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 elif event.type is KEYDOWN:
-                    if event.key == K_RIGHT \
-                            or event.key == K_LEFT \
-                            or event.key == K_UP \
-                            or event.key == K_DOWN:
-                                self.pacman.move(self.block_sprites, event.key)
+                    if event.key in [K_RIGHT, K_LEFT, K_UP, K_DOWN]:
+                        self.pacman.move(self.block_sprites, event.key)
 
             # enemies random move
-            self.blinky.move(self.block_sprites)
-            self.inky.move(self.block_sprites)
-            self.clyde.move(self.block_sprites)
-            self.pinky.move(self.block_sprites)
+            for ghost in self.enemies:
+                ghost.move(self.block_sprites)
 
-            if pygame.sprite.collide_rect(self.blinky, self.pacman) or\
-                pygame.sprite.collide_rect(self.inky, self.pacman) or\
-                pygame.sprite.collide_rect(self.clyde, self.pacman) or\
-                pygame.sprite.collide_rect(self.pinky, self.pacman):
+            if pygame.sprite.spritecollide(self.pacman, self.enemies_sprites, False):
                 #we have collision with ghost so increment ghost collision counter
                 #and drop to zero number of eaten pellets
                 self.enemy_cols += 1
@@ -206,10 +206,7 @@ class Game:
                     self.enemy_cols = 0
                     while True:
                         self.__big_event_handler("You lost. Play again (y/n)?")
-                        if self.break_flag:
-                            break
                         pygame.display.flip()
-
                 #going out from loop and restart it
                 break
 
@@ -222,8 +219,6 @@ class Game:
                 if self.pacman.pellets == self.max_pellets:
                     while True:
                         self.__big_event_handler("You Won!!! Play again (y/n)?")
-                        if self.break_flag:
-                            break
                         pygame.display.flip()
 
             #adding background on the screen
@@ -232,11 +227,7 @@ class Game:
             #draw sprites
             self.pellet_sprites.draw(self.screen)
             self.pacman_sprite.draw(self.screen)
-            self.blinky_sprite.draw(self.screen)
-            self.pinky_sprite.draw(self.screen)
-            self.inky_sprite.draw(self.screen)
-            self.clyde_sprite.draw(self.screen)
-
+            self.enemies_sprites.draw(self.screen)
             utils.draw_text("Score: %d "%self.pacman.score,
                             self.font30,
                             self.screen,
@@ -250,13 +241,13 @@ class Game:
 
             pygame.display.flip()
             self.clock.tick(40)
-        if  not self.break_flag:
-            self.sounds['die'].play()
-            #we killed ,so minus one life
-            #and we need to save previos score cause after start main loop below
-            #self.pacman.score variable will be initialized with zero again
-            self.lives_cntr -= 1
-            self.prev_life_score = self.pacman.score
+
+        self.sounds['die'].play()
+        #we killed ,so minus one life
+        #and we need to save previos score cause after start main loop below
+        #self.pacman.score variable will be initialized with zero again
+        self.lives_cntr -= 1
+        self.prev_life_score = self.pacman.score
         self.main_loop()
 
 
