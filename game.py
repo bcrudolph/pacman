@@ -88,10 +88,51 @@ class Game:
         #bool var for check enabled menu or not
         self.set_menu = False
 
+    def __set_map(self, x_offset, y_offset, level, layout, images):
+        for y in range(len(layout)):
+            for x in range(len(layout[y])):
+                '''Get the center point for the rects'''
+
+                center_point = [(x*config.block_size)+x_offset, (y*config.block_size+y_offset)]
+                '''
+                res = {level.BLOCK:
+                           self.block_sprites.add(models.BasicSprite(center_point, images[level.BLOCK])),
+                       level.GWALL:
+                           self.gwall_sprites.add(models.BasicSprite(center_point, images[level.GWALL])),
+                       level.PACMAN:
+                           self.pac.append(models.Pacman(center_point, images[level.PACMAN])),
+                       level.PELLET:
+                           self.pellet_sprites.add(models.BasicSprite(center_point, images[level.PELLET], colorkey=-1)),
+                       level.BLINKY:
+                           self.enemies.append(models.Enemy(center_point, images[level.BLINKY], colorkey=-1)),
+                       level.INKY:
+                           self.enemies.append(models.Enemy(center_point, images[level.INKY], colorkey=-1)),
+                       level.PINKY:
+                           self.enemies.append(models.Enemy(center_point, images[level.PINKY], colorkey=-1)),
+                       level.CLYDE:
+                           self.enemies.append(models.Enemy(center_point, images[level.CLYDE], colorkey=-1))
+                }.get(layout[y][x], None)
+                '''
+                if layout[y][x] == level.BLOCK:
+                    self.block_sprites.add(models.BasicSprite(center_point, images[level.BLOCK]))
+                elif layout[y][x] == level.GWALL:
+                    self.gwall_sprites.add(models.BasicSprite(center_point, images[level.GWALL]))
+                elif layout[y][x] == level.PACMAN:
+                    self.pacman = models.Pacman(center_point, images[level.PACMAN])
+                elif layout[y][x] == level.PELLET:
+                    self.pellet_sprites.add(models.BasicSprite(center_point, images[level.PELLET], colorkey=-1))
+                elif layout[y][x] == level.BLINKY:
+                    self.enemies.append(models.Enemy(center_point, images[level.BLINKY], colorkey=-1))
+                elif layout[y][x] == level.INKY:
+                    self.enemies.append(models.Enemy(center_point, images[level.INKY], colorkey=-1))
+                elif layout[y][x] == level.PINKY:
+                    self.enemies.append(models.Enemy(center_point, images[level.PINKY], colorkey=-1))
+                elif layout[y][x] == level.CLYDE:
+                    self.enemies.append(models.Enemy(center_point, images[level.CLYDE], colorkey=-1))
+
     def __load_sprites(self):
         x_offset = (config.block_size/2)
         y_offset = (config.block_size/2)
-
         ##getting layout and images for level one
         level1 = level001.level() 
         layout = level1.get_layout()
@@ -104,27 +145,11 @@ class Game:
         self.enemies = list()
         self.enemies_sprites = pygame.sprite.Group()
 
-        for y in range(len(layout)):
-            for x in range(len(layout[y])):
-                '''Get the center point for the rects'''
+        #self.pac = list()
 
-                center_point = [(x*config.block_size)+x_offset, (y*config.block_size+y_offset)]
-                if layout[y][x] == level1.BLOCK:
-                    self.block_sprites.add(models.BasicSprite(center_point, images[level1.BLOCK]))
-                elif layout[y][x] == level1.GWALL:
-                    self.gwall_sprites.add(models.BasicSprite(center_point, images[level1.GWALL]))
-                elif layout[y][x] == level1.PACMAN:
-                    self.pacman = models.Pacman(center_point, images[level1.PACMAN])
-                elif layout[y][x] == level1.PELLET:
-                    self.pellet_sprites.add(models.BasicSprite(center_point, images[level1.PELLET], colorkey=-1))
-                elif layout[y][x] == level1.BLINKY:
-                    self.enemies.append(models.Enemy(center_point, images[level1.BLINKY], colorkey=-1))
-                elif layout[y][x] == level1.INKY:
-                    self.enemies.append(models.Enemy(center_point, images[level1.INKY], colorkey=-1))
-                elif layout[y][x] == level1.PINKY:
-                    self.enemies.append(models.Enemy(center_point, images[level1.PINKY], colorkey=-1))
-                elif layout[y][x] == level1.CLYDE:
-                    self.enemies.append(models.Enemy(center_point, images[level1.CLYDE], colorkey=-1))
+        self.__set_map(x_offset, y_offset, level1, layout, images)
+
+        #self.pacman = self.pac[0]
 
         self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman))
         for ghost in self.enemies:
@@ -162,8 +187,6 @@ class Game:
                 self.lives_cntr = 3
                 self.set_menu = False
                 self.main_loop()
-                #pygame.quit()
-                #sys.exit()
 
     def main_loop(self):
 
