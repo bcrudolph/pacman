@@ -127,11 +127,7 @@ class Game:
         self.enemies = list()
         self.enemies_sprites = pygame.sprite.Group()
 
-        #self.pac = list()
-
         self.__load_level(x_offset, y_offset, level1, layout, images)
-
-        #self.pacman = self.pac[0]
 
         self.pacman_sprite = pygame.sprite.RenderPlain((self.pacman))
         for ghost in self.enemies:
